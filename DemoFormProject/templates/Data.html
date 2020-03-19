@@ -1,0 +1,32 @@
+﻿
+﻿{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="row my-grid-borders">
+    <p> </p>
+</div>
+<div class="container">
+    <table class="table">
+        <tbody>
+            <tr>
+                <td><img src="/static/pics/crime1.jpg" class="img-thumbnail" height="300" width="300"></td>
+                <td><img src="/static/pics/research.png" class="img-thumbnail" height="300" width="300"></td>
+                <td><img src="/static/pics/crime2.jpg" class="img-thumbnail" height="300" width="300"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="row my-grid-borders">
+    <div class="col-md-5 my-grid-borders"><a href="{{ url_for('SanFranciscoData') }}">San Francisco Crime Dataset</a></div>
+    <div class="col-md-5 my-grid-borders">
+        <p ckass="heb">San Francisco Crime Data Page</p>
+    </div>
+</div>
+<div class="row my-grid-borders">
+    <div class="col-md-5 my-grid-borders"><a href="{{ url_for('BostonData') }}">Boston Crime Dataset</a></div>
+    <div class="col-md-5 my-grid-borders">
+        <p ckass="heb">Boston Crime Data Page</p>
+    </div>
+</div>
+{% endblock %}

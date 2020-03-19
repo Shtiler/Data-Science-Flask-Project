@@ -1,0 +1,7 @@
+Flask<1
+Pandas
+MatPlotLib
+Flask_wtf
+requests
+Flask-bootstrap
+Flask-moment
