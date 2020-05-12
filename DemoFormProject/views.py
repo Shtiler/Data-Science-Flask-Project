@@ -35,8 +35,6 @@ from DemoFormProject.Models.QueryFormStructure import LoginFormStructure
 from DemoFormProject.Models.QueryFormStructure import UserRegistrationFormStructure 
 from DemoFormProject.Models.Forms import QueryForm
 
-###from DemoFormProject.Models.LocalDatabaseRoutines import IsUserExist, IsLoginGood, AddNewUser 
-
 db_Functions = create_LocalDatabaseServiceRoutines() 
 
 

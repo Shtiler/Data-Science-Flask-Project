@@ -2,28 +2,44 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
-
-<div class="row">
-
-    <div class="col-md-4">
-        <form method="post">
-            {{ form1.csrf_token }}
-            {{ wtf.form_field(form1.category)}}
-            {{ wtf.form_field(form1.daymonthchosen)}}
-            <input class="btn btn-primary" type="submit" value="submit">
-        </form>
-    </div>
-    <div class="col-md-8">
-        <div class="row">
-            <img src={{ chart }} class="img-thumbnail" alt="not found">
+    <div class="row">
+        <div class="col-md-6">
+            <h2 class="heb">How To Use The Query</h2>
+            <p class="heb">
+                <p>
+                    There are 8 categories from which you can choose.
+                </p>
+                <br />
+                <p>After choosing a category you need to choose how you want the graph to organize by days or months</p>
+                <br />
+                <p style="color:blue"> * Blue shows the amount of incidents in San Francisco</p>
+                <br />
+                <p style="color:orange"> * Orange shows the amout of incidents in Boston</p>
+                <br />
+                <p> The Graph will be shown below after choosing 2 parameters and clicking the submit button</p>
+            </p>
         </div>
-    </div>
-</div>
 
-<hr />
+        <div class="row">
+            <div class="col-md-4">
+                <form method="post">
+                    {{ form1.csrf_token }}
+                    {{ wtf.form_field(form1.category)}}
+                    {{ wtf.form_field(form1.daymonthchosen)}}
+                    <input class="btn btn-primary" type="submit" value="submit">
+                </form>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <img src={{ chart }} class="img-thumbnail" alt="not found">
+                </div>
+            </div>
+        </div>
+
+        <hr />
 
 
 
-<hr />
+        <hr />
 
-    {% endblock %}
+        {% endblock %}
