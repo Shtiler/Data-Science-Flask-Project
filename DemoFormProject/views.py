@@ -18,15 +18,12 @@ from wtforms.validators import DataRequired
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-
+import calendar
 import json 
 import requests
-
+import base64from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvasfrom matplotlib.figure import Figure
 import io
-import base64
-
 from os import path
-
 from flask   import Flask, render_template, flash, request
 from wtforms import Form, BooleanField, StringField, PasswordField, validators
 from wtforms import TextField, TextAreaField, SubmitField, SelectField, DateField
@@ -36,6 +33,7 @@ from DemoFormProject.Models.Forms import CollapseForm
 from DemoFormProject.Models.QueryFormStructure import QueryFormStructure 
 from DemoFormProject.Models.QueryFormStructure import LoginFormStructure 
 from DemoFormProject.Models.QueryFormStructure import UserRegistrationFormStructure 
+from DemoFormProject.Models.Forms import QueryForm
 
 ###from DemoFormProject.Models.LocalDatabaseRoutines import IsUserExist, IsLoginGood, AddNewUser 
 
@@ -84,39 +82,79 @@ def Album():
     )
 
 
-@app.route('/Query', methods=['GET', 'POST'])
+@app.route('/Query' , methods = ['GET' , 'POST'])
 def Query():
 
-    Name = None
-    Country = ''
-    capital = ''
-    df = pd.read_csv(path.join(path.dirname(__file__), 'static\\Data\\capitals.csv'))
-    df = df.set_index('Country')
+    form1 = QueryForm()
+    chart = '/static/pics/contactpic.png'
 
-    form = QueryFormStructure(request.form)
-     
-    if (request.method == 'POST' ):
-        name = form.name.data
-        Country = name
-        if (name in df.index):
-            capital = df.loc[name,'Capital']
-        else:
-            capital = name + ', no such country'
-        form.name.data = ''
+   
+    dfSF = pd.read_csv(path.join(path.dirname(__file__), 'static/data/SF.csv'), encoding="ISO-8859-1")
+    dfBoston = pd.read_csv(path.join(path.dirname(__file__), 'static/data/BostonData.csv'), encoding="ISO-8859-1")
+    chosencategory = form1.category.data
+    daymonthchosen = form1.daymonthchosen.data
 
-    df = pd.read_csv(path.join(path.dirname(__file__), 'static\\Data\\users.csv'))
-
-    raw_data_table = df.to_html(classes = 'table table-hover')
-
-    return render_template('Query.html', 
-            form = form, 
-            name = capital, 
-            Country = Country,
-            raw_data_table = raw_data_table,
-            title='Query by the user',
-            year=datetime.now().year,
-            message='This page will use the web forms to get user input'
-        )
+    if request.method == 'POST':
+        categories_boston = list(set(dfBoston["OFFENSE_CODE_GROUP"].tolist()))
+        i = 0
+        for item in categories_boston:
+            categories_boston[i] = item.lower()
+            i = i+1
+        categories_SF = list(set(dfSF["Category"].tolist()))
+        i = 0
+        for item in categories_SF:
+            categories_SF[i] = item.lower()
+            i = i+1
+        commonlist = []
+        for item in categories_SF:
+            if item in categories_boston:
+                commonlist.append(item)
+        dfSF = dfSF[["Category","Date"]]
+        dfSF["Date"] = pd.to_datetime(dfSF["Date"])
+        dfSF["Month"] = dfSF["Date"].dt.month_name()
+        dfSF["Day"] = dfSF["Date"].dt.day_name()
+        dfSF = dfSF.drop("Date" , 1)
+        dfSF["Category"] = dfSF["Category"].apply(lambda x:x.lower())
+        dfBoston = dfBoston[["OFFENSE_CODE_GROUP","OCCURRED_ON_DATE"]]
+        dfBoston["OCCURRED_ON_DATE"] = pd.to_datetime(dfBoston["OCCURRED_ON_DATE"])
+        dfBoston["Day"] = dfBoston["OCCURRED_ON_DATE"].dt.day_name()
+        dfBoston["Month"] = dfBoston["OCCURRED_ON_DATE"].dt.month_name()
+        dfBoston = dfBoston.drop("OCCURRED_ON_DATE" , 1)
+        dfBoston = dfBoston.rename(columns = {"OFFENSE_CODE_GROUP" : "Category"})
+        dfBoston["Category"] = dfBoston["Category"].apply(lambda x:x.lower())
+        dfSF = dfSF[dfSF["Category"].isin(commonlist)]
+        dfBoston = dfBoston[dfBoston["Category"].isin(commonlist)]
+        dfBoston = dfBoston[dfBoston.Category == chosencategory]
+        dfSF = dfSF[dfSF.Category == chosencategory]
+        if daymonthchosen == "Day" : 
+            dfBoston = dfBoston.drop("Month",1)
+            dfSF = dfSF.drop("Month",1)
+            dfBoston = dfBoston.groupby("Day").size().to_frame(name = 'Boston')
+            dfSF = dfSF.groupby("Day").size().to_frame(name = 'SF')
+            dfSF = dfSF.reindex(calendar.day_name)
+            dfBoston = dfBoston.reindex(calendar.day_name)
+            dfSF = dfSF.dropna()
+            dfBoston = dfBoston.dropna()
+        else :
+            dfBoston = dfBoston.drop("Day",1)
+            dfBoston = dfBoston.groupby("Month").size().to_frame(name = 'Boston')
+            dfSF = dfSF.drop("Day",1)
+            dfSF = dfSF.groupby("Month").size().to_frame(name = 'SF')
+            dfSF = dfSF.reindex(calendar.month_name)
+            dfBoston = dfBoston.reindex(calendar.month_name)
+            dfSF = dfSF.dropna()
+            dfBoston = dfBoston.dropna()
+        dfCombo = pd.merge(dfSF,dfBoston,on = daymonthchosen)
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        fig.subplots_adjust(bottom=0.4)
+        dfCombo.plot(kind = "bar", ax = ax)
+        chart = plot_to_img(fig)
+    return render_template(
+        'Query.html',
+        form1 = form1,
+        chart = chart
+    )
 
 # -------------------------------------------------------
 # Register new user page
@@ -222,3 +260,10 @@ def SanFranciscoData():
         message='Your application description page.',
         raw_data_table = raw_data_table
     )
+
+
+
+def plot_to_img(fig):    pngImage = io.BytesIO()    FigureCanvas(fig).print_png(pngImage)    pngImageB64String = "data:image/png;base64,"    pngImageB64String += base64.b64encode(pngImage.getvalue()).decode('utf8')    return pngImageB64String
+
+
+

@@ -55,9 +55,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DemoFormProject\static\Data\Boston.csv" />
+    <Content Include="DemoFormProject\static\Data\BostonData.csv" />
     <Content Include="DemoFormProject\static\Data\SanFran.csv" />
-    <Content Include="DemoFormProject\static\Data\users.csv" />
     <Content Include="DemoFormProject\static\Data\capitals.csv" />
+    <Content Include="DemoFormProject\static\Data\SF.csv" />
+    <Content Include="DemoFormProject\static\Data\users.csv" />
     <Content Include="DemoFormProject\static\pics\Boston.jpg" />
     <Content Include="DemoFormProject\static\pics\contactpic.png" />
     <Content Include="DemoFormProject\static\pics\crime1.jpg" />
